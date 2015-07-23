@@ -1,0 +1,144 @@
+package uk.co.jpereira.expressionCounter.counter;
+
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created by Joao Pereira on 23/07/2015.
+ */
+public class Counter {
+    /**
+     * Output saved
+     */
+    private Hashtable<String, Integer> result = new Hashtable<String, Integer>();
+    /**
+     * List with all the expressions that can be merged
+     */
+    private Hashtable<String, List<String>> mergeList = new Hashtable<String,  List<String>>();
+    /**
+     * List with all the expressions to be ignored
+     */
+    private List<String> ignoreList = new ArrayList<String>();
+
+    /**
+     * Count using case sensitive
+     */
+    private boolean caseSensitive = false;
+
+    /**
+     * Separator used in keywords with more then 1 word that will be merged
+     */
+    private final String SEP = "@@@@@";
+
+    /**
+     * Class constructor
+     */
+    public Counter() {
+    }
+
+    /**
+     * Class constructor
+     * @param mergeList List of expressions that can be merged
+     */
+    public Counter(Hashtable<String, List<String>> mergeList) {
+        setMergeList(mergeList);
+    }
+
+    /**
+     * Class constructor
+     * @param ignoreList List of expressions that can be ignored
+     */
+    public Counter(List<String> ignoreList) {
+        this.ignoreList = ignoreList;
+    }
+
+    /**
+     * Class constructor
+     * @param ignoreList List of expressions that can be ignored
+     * @param mergeList List of expressions that can be merged
+     */
+    public Counter(List<String> ignoreList, Hashtable<String, List<String>> mergeList) {
+        this.ignoreList = ignoreList;
+        setMergeList(mergeList);
+    }
+
+    /**
+     * Check if the next calculation will be case sensitive or not
+     * @return True if will be case sensitive, False otherwise
+     */
+    public boolean isCaseSensitive() {
+        return caseSensitive;
+    }
+
+    /**
+     * Set if the next calculation will be case sensitive or not
+     * @param caseSensitive True if next calculation is case sensitive, False otherwise
+     */
+    public void setCaseSensitive(boolean caseSensitive) {
+        this.caseSensitive = caseSensitive;
+    }
+
+    /**
+     * Change the list of merge expressions
+     * @param mergeList New list of merge expressions
+     */
+    public void setMergeList(Hashtable<String, List<String>> mergeList) {
+        this.mergeList = new Hashtable<String, List<String>>();
+        for (Map.Entry<String, List<String>> newVal: mergeList.entrySet()) {
+            this.mergeList.put(newVal.getKey().replaceAll(" ", SEP), newVal.getValue());
+        }
+    }
+
+    /**
+     * Retrieve the list of merge expressions used
+     * @return List of merge expressions
+     */
+    public Hashtable<String, List<String>> getMergeList() {
+        return this.mergeList;
+    }
+
+    /**
+     * Retrieve the last calculated result
+     * @return Calculation result
+     */
+    public Hashtable<String, Integer> getResult() {
+        return result;
+    }
+
+    /**
+     * Method will generate a hash table with the expression
+     * @param expression Expression to be checked
+     * @return Hash table with the accumulated results
+     */
+    public Hashtable<String, Integer> calculate(String expression) {
+        String auxExpression = expression;
+        if (!caseSensitive) {
+            auxExpression = expression.toLowerCase();
+        }
+
+        for (String ignore: ignoreList) {
+            auxExpression.replaceAll(ignore, "");
+        }
+
+        for (String key: mergeList.keySet()) {
+            for (String convert: mergeList.get(key)) {
+                auxExpression.replaceAll(convert, key);
+            }
+        }
+
+        for (String phrase: auxExpression.split("\\.")) {
+            for (String word: phrase.split(" ")) {
+                try {
+                    Integer a = result.get(word);
+                    result.put(word, a+1);
+                } catch(NullPointerException e) {
+                    result.put(word, 1);
+                }
+            }
+        }
+
+        return result;
+    }
+}
