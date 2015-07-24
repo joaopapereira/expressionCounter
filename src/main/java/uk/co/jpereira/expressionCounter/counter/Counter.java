@@ -14,15 +14,15 @@ public class Counter {
     /**
      * Output saved
      */
-    private Hashtable<String, Integer> result;
+    private Hashtable<String, Integer> result = new Hashtable<String, Integer>();
     /**
      * List with all the expressions that can be merged
      */
-    private Hashtable<String, List<String>> mergeList;
+    private Hashtable<String, List<String>> mergeList = new Hashtable<String, List<String>>();
     /**
      * List with all the expressions to be ignored
      */
-    private List<String> ignoreList;
+    private List<String> ignoreList = new ArrayList<String>();
 
     /**
      * Count using case sensitive
@@ -38,9 +38,6 @@ public class Counter {
      * Class constructor
      */
     public Counter() {
-        result = new Hashtable();
-        mergeList = new Hashtable();
-        ignoreList = new ArrayList();
     }
 
     /**
@@ -49,8 +46,6 @@ public class Counter {
      */
     public Counter(Hashtable<String, List<String>> mergeList) {
         setMergeList(mergeList);
-        result = new Hashtable<>();
-        ignoreList = new ArrayList<>();
     }
 
     /**
@@ -59,8 +54,6 @@ public class Counter {
      */
     public Counter(List<String> ignoreList) {
         this.ignoreList = ignoreList;
-        result = new Hashtable<>();
-        mergeList = new Hashtable<>();
     }
 
     /**
@@ -71,7 +64,6 @@ public class Counter {
     public Counter(List<String> ignoreList, Hashtable<String, List<String>> mergeList) {
         this.ignoreList = ignoreList;
         setMergeList(mergeList);
-        result = new Hashtable<>();
     }
 
     /**
