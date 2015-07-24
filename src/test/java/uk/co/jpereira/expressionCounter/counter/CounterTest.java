@@ -54,9 +54,9 @@ public class CounterTest extends TestCase {
     public void testCalculateSimpleExampleCaseSensitive() throws Exception {
         Counter cnt = new Counter();
         String text = "Lorem ipsum ad his scripta blandit partiendo. Scripta ad His.";
+        cnt.setCaseSensitive(true);
         Hashtable<String, Integer> retVal;
         retVal = cnt.calculate(text);
-        cnt.setCaseSensitive(true);
         Assert.assertEquals(2, retVal.get("ad").intValue());
         Assert.assertEquals(1, retVal.get("his").intValue());
         Assert.assertEquals(1, retVal.get("Scripta").intValue());
@@ -81,13 +81,13 @@ public class CounterTest extends TestCase {
     public void testCalculateWithIgnoreListExampleCaseSensitive() throws Exception {
         ArrayList<String> ignoreList = new ArrayList<String>();
         ignoreList.add("His");
-        ignoreList.add("$\\wd^");
-        ignoreList.add("$L.+sum");
+        ignoreList.add(" \\wd ");
+        ignoreList.add("\\s*L.+sum\\s");
         Counter cnt = new Counter(ignoreList);
         String text = "Lorem ipsum ad his scripta blandit partiendo. Scripta ad His.";
         Hashtable<String, Integer> retVal;
-        retVal = cnt.calculate(text);
         cnt.setCaseSensitive(true);
+        retVal = cnt.calculate(text);
         Assert.assertNull(retVal.get("ad"));
         Assert.assertNull(retVal.get("Lorem"));
         Assert.assertEquals(1, retVal.get("his").intValue());
@@ -97,19 +97,108 @@ public class CounterTest extends TestCase {
     public void testCalculateWithIgnoreListExampleCaseInsensitive() throws Exception {
         ArrayList<String> ignoreList = new ArrayList<String>();
         ignoreList.add("His");
-        ignoreList.add("$\\wd^");
-        ignoreList.add("$L.+sum");
-        Counter cnt = new Counter();
+        ignoreList.add(" \\wd ");
+        ignoreList.add("\\s*L.+sum\\s");
+        Counter cnt = new Counter(ignoreList);
+        String text = "Lorem ipsum ad his scripta blandit partiendo. Scripta ad His.";
+        Hashtable<String, Integer> retVal;
+        cnt.setCaseSensitive(false);
+        retVal = cnt.calculate(text);
+
+        Assert.assertEquals(1, retVal.get("his").intValue());
+        Assert.assertNull(retVal.get("ad"));
+        Assert.assertNull(retVal.get("lorem"));
+        Assert.assertNull(retVal.get("Scripta"));
+        Assert.assertEquals(2, retVal.get("scripta").intValue());
+        Assert.assertEquals(1, retVal.get("partiendo").intValue());
+    }
+
+
+    @Test
+    public void testCalculateWithMergeListExampleCaseSensitive() throws Exception {
+        Hashtable<String, List<String>> mergeList = new Hashtable<String, List<String>>();
+        ArrayList<String> singleList = new ArrayList<String>();
+        singleList.add("\\s*L.+sum\\s");
+        singleList.add("\\sscripta blandit\\s");
+        mergeList.put("Bamba", singleList);
+        Counter cnt = new Counter(mergeList);
+        String text = "Lorem ipsum ad his scripta blandit partiendo. Scripta ad His.";
+        Hashtable<String, Integer> retVal;
+        cnt.setCaseSensitive(true);
+        retVal = cnt.calculate(text);
+        Assert.assertEquals(2, retVal.get("ad").intValue());
+        Assert.assertNull(retVal.get("Lorem"));
+        Assert.assertEquals(1, retVal.get("his").intValue());
+        Assert.assertEquals(1, retVal.get("Scripta").intValue());
+        Assert.assertEquals(2, retVal.get("Bamba").intValue());
+    }
+    @Test
+    public void testCalculateWithMergeListExampleCaseInsensitive() throws Exception {
+        Hashtable<String, List<String>> mergeList = new Hashtable<String, List<String>>();
+        ArrayList<String> singleList = new ArrayList<String>();
+        singleList.add("\\s*L.+sum\\s");
+        singleList.add("\\sscripta blandit\\s");
+        mergeList.put("Bamba", singleList);
+        Counter cnt = new Counter(mergeList);
         String text = "Lorem ipsum ad his scripta blandit partiendo. Scripta ad His.";
         Hashtable<String, Integer> retVal;
         cnt.setCaseSensitive(false);
         retVal = cnt.calculate(text);
 
         Assert.assertEquals(2, retVal.get("his").intValue());
-        Assert.assertNull(retVal.get("ad"));
-        Assert.assertNull(retVal.get("lorem"));
+        Assert.assertEquals(2, retVal.get("ad").intValue());
+        Assert.assertEquals(1, retVal.get("lorem").intValue());
+        Assert.assertNull(retVal.get("Scripta"));
+        Assert.assertEquals(1, retVal.get("scripta").intValue());
+        Assert.assertEquals(1, retVal.get("partiendo").intValue());
+        Assert.assertEquals(1, retVal.get("Bamba").intValue());
+    }
+    @Test
+    public void testCalculateWithMergeListWithIgnoreListExampleCaseSensitive() throws Exception {
+        Hashtable<String, List<String>> mergeList = new Hashtable<String, List<String>>();
+        ArrayList<String> singleList = new ArrayList<String>();
+        singleList.add("\\s*L.+sum\\s");
+        singleList.add("\\sscripta blandit\\s");
+        mergeList.put("Bamba", singleList);
+
+        ArrayList<String> ignoreList = new ArrayList<String>();
+        ignoreList.add("Lorem");
+
+        Counter cnt = new Counter(ignoreList, mergeList);
+        String text = "Lorem ipsum ad his scripta blandit partiendo. Scripta ad His.";
+        Hashtable<String, Integer> retVal;
+        cnt.setCaseSensitive(true);
+        retVal = cnt.calculate(text);
+        Assert.assertEquals(2, retVal.get("ad").intValue());
+        Assert.assertNull(retVal.get("Lorem"));
+        Assert.assertEquals(1, retVal.get("his").intValue());
+        Assert.assertEquals(1, retVal.get("Scripta").intValue());
+        Assert.assertEquals(1, retVal.get("Bamba").intValue());
+        Assert.assertEquals(1, retVal.get("ipsum").intValue());
+    }
+    @Test
+    public void testCalculateWithMergeListWithIgnoreListExampleCaseInsensitive() throws Exception {
+        Hashtable<String, List<String>> mergeList = new Hashtable<String, List<String>>();
+        ArrayList<String> singleList = new ArrayList<String>();
+        singleList.add("\\s*L.+sum\\s");
+        singleList.add("\\sscripta blandit\\s");
+        mergeList.put("Bamba", singleList);
+
+        ArrayList<String> ignoreList = new ArrayList<String>();
+        ignoreList.add("blandit");
+
+        Counter cnt = new Counter(ignoreList, mergeList);
+        String text = "Lorem ipsum ad his scripta blandit partiendo. Scripta ad His.";
+        Hashtable<String, Integer> retVal;
+        cnt.setCaseSensitive(false);
+        retVal = cnt.calculate(text);
+
+        Assert.assertEquals(2, retVal.get("his").intValue());
+        Assert.assertEquals(2, retVal.get("ad").intValue());
+        Assert.assertEquals(1, retVal.get("lorem").intValue());
         Assert.assertNull(retVal.get("Scripta"));
         Assert.assertEquals(2, retVal.get("scripta").intValue());
         Assert.assertEquals(1, retVal.get("partiendo").intValue());
+        Assert.assertNull(retVal.get("Bamba"));
     }
 }

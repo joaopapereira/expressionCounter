@@ -6,21 +6,23 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * @author Joao Pereira
+ * Class that given a text count the words in it
  * Created by Joao Pereira on 23/07/2015.
  */
 public class Counter {
     /**
      * Output saved
      */
-    private Hashtable<String, Integer> result = new Hashtable<String, Integer>();
+    private Hashtable<String, Integer> result;
     /**
      * List with all the expressions that can be merged
      */
-    private Hashtable<String, List<String>> mergeList = new Hashtable<String,  List<String>>();
+    private Hashtable<String, List<String>> mergeList;
     /**
      * List with all the expressions to be ignored
      */
-    private List<String> ignoreList = new ArrayList<String>();
+    private List<String> ignoreList;
 
     /**
      * Count using case sensitive
@@ -30,12 +32,15 @@ public class Counter {
     /**
      * Separator used in keywords with more then 1 word that will be merged
      */
-    private final String SEP = "@@@@@";
+    private final static String SEP = "@@@@@";
 
     /**
      * Class constructor
      */
     public Counter() {
+        result = new Hashtable();
+        mergeList = new Hashtable();
+        ignoreList = new ArrayList();
     }
 
     /**
@@ -44,6 +49,8 @@ public class Counter {
      */
     public Counter(Hashtable<String, List<String>> mergeList) {
         setMergeList(mergeList);
+        result = new Hashtable<>();
+        ignoreList = new ArrayList<>();
     }
 
     /**
@@ -52,6 +59,8 @@ public class Counter {
      */
     public Counter(List<String> ignoreList) {
         this.ignoreList = ignoreList;
+        result = new Hashtable<>();
+        mergeList = new Hashtable<>();
     }
 
     /**
@@ -62,6 +71,7 @@ public class Counter {
     public Counter(List<String> ignoreList, Hashtable<String, List<String>> mergeList) {
         this.ignoreList = ignoreList;
         setMergeList(mergeList);
+        result = new Hashtable<>();
     }
 
     /**
@@ -85,7 +95,7 @@ public class Counter {
      * @param mergeList New list of merge expressions
      */
     public void setMergeList(Hashtable<String, List<String>> mergeList) {
-        this.mergeList = new Hashtable<String, List<String>>();
+        this.mergeList = new Hashtable<>();
         for (Map.Entry<String, List<String>> newVal: mergeList.entrySet()) {
             this.mergeList.put(newVal.getKey().replaceAll(" ", SEP), newVal.getValue());
         }
@@ -114,22 +124,27 @@ public class Counter {
      */
     public Hashtable<String, Integer> calculate(String expression) {
         String auxExpression = expression;
-        if (!caseSensitive) {
-            auxExpression = expression.toLowerCase();
-        }
 
+        // Remove the expressions that should be ignored
         for (String ignore: ignoreList) {
-            auxExpression.replaceAll(ignore, "");
+            auxExpression = auxExpression.replaceAll(ignore, " ");
         }
 
+        // Convert everything to lower case if the search should be case insensitive
+        if (!isCaseSensitive()) {
+            auxExpression = auxExpression.toLowerCase();
+        }
+
+        // Merge all expressions or words
         for (String key: mergeList.keySet()) {
             for (String convert: mergeList.get(key)) {
-                auxExpression.replaceAll(convert, key);
+                auxExpression = auxExpression.replaceAll(convert, " " + key + " ");
             }
         }
 
+        // Do the reduce to words
         for (String phrase: auxExpression.split("\\.")) {
-            for (String word: phrase.split(" ")) {
+            for (String word: phrase.split("\\s+")) {
                 try {
                     Integer a = result.get(word);
                     result.put(word, a+1);
