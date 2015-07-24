@@ -87,7 +87,7 @@ public class Counter {
      * @param mergeList New list of merge expressions
      */
     public void setMergeList(Hashtable<String, List<String>> mergeList) {
-        this.mergeList = new Hashtable<>();
+        this.mergeList = new Hashtable<String, List<String>>();
         for (Map.Entry<String, List<String>> newVal: mergeList.entrySet()) {
             this.mergeList.put(newVal.getKey().replaceAll(" ", SEP), newVal.getValue());
         }
