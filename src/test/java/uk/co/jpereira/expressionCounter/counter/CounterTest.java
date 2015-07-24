@@ -113,7 +113,6 @@ public class CounterTest extends TestCase {
         Assert.assertEquals(1, retVal.get("partiendo").intValue());
     }
 
-
     @Test
     public void testCalculateWithMergeListExampleCaseSensitive() throws Exception {
         Hashtable<String, List<String>> mergeList = new Hashtable<String, List<String>>();
@@ -153,6 +152,25 @@ public class CounterTest extends TestCase {
         Assert.assertEquals(1, retVal.get("partiendo").intValue());
         Assert.assertEquals(1, retVal.get("Bamba").intValue());
     }
+    @Test
+    public void testCalculateWithMergeToExpressionExample() throws Exception {
+        Hashtable<String, List<String>> mergeList = new Hashtable<String, List<String>>();
+        ArrayList<String> singleList = new ArrayList<String>();
+        singleList.add("\\s*L.+sum\\s");
+        singleList.add("\\sscripta blandit\\s");
+        mergeList.put("My master script", singleList);
+        Counter cnt = new Counter(mergeList);
+        String text = "Lorem ipsum ad his scripta blandit partiendo. Scripta ad His.";
+        Hashtable<String, Integer> retVal;
+        cnt.setCaseSensitive(true);
+        retVal = cnt.calculate(text);
+        Assert.assertEquals(2, retVal.get("ad").intValue());
+        Assert.assertNull(retVal.get("Lorem"));
+        Assert.assertEquals(1, retVal.get("his").intValue());
+        Assert.assertEquals(1, retVal.get("Scripta").intValue());
+        Assert.assertEquals(2, retVal.get("My master script").intValue());
+    }
+
     @Test
     public void testCalculateWithMergeListWithIgnoreListExampleCaseSensitive() throws Exception {
         Hashtable<String, List<String>> mergeList = new Hashtable<String, List<String>>();

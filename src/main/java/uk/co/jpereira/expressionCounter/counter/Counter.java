@@ -145,11 +145,12 @@ public class Counter {
         // Do the reduce to words
         for (String phrase: auxExpression.split("\\.")) {
             for (String word: phrase.split("\\s+")) {
+                String auxWord = word.replaceAll(SEP, " ");
                 try {
-                    Integer a = result.get(word);
-                    result.put(word, a+1);
+                    Integer a = result.get(auxWord);
+                    result.put(auxWord, a+1);
                 } catch(NullPointerException e) {
-                    result.put(word, 1);
+                    result.put(auxWord, 1);
                 }
             }
         }
